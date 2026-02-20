@@ -1,0 +1,38 @@
+# Build output
+bin/
+obj/
+out/
+artifacts/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio / Rider / VS Code
+.vs/
+.idea/
+.vscode/
+
+# Test results and coverage
+TestResults/
+*.coverage
+*.coveragexml
+coverage/
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+
+# Logs and local runtime data
+*.log
+logs/
+
+# FocusBuddy local app data (if generated in repo accidentally)
+AppData/
+
+# OS files
+.DS_Store
+Thumbs.db
