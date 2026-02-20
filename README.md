@@ -1,6 +1,6 @@
 # FocusBuddy
 
-FocusBuddy is a Windows desktop utility for personal focus analytics.
+FocusBuddy is a production-structured Windows desktop utility for personal focus analytics.
 It tracks foreground window usage, categorizes activity, stores data in local SQLite, and offers a non-destructive Focus Mode.
 
 ## Stack
@@ -56,61 +56,25 @@ FocusBuddy/
 - Serilog
 - Serilog.Sinks.File
 
-## Open / Build / Run (Windows)
+## Build
 
-### 1) Where to open the project
-Open the repository root folder (the folder that contains `FocusBuddy.csproj`).
-
-- Visual Studio 2022:
-  - `File > Open > Folder...` and select this repo root, **or**
-  - `File > Open > Project/Solution...` and choose `FocusBuddy.csproj`.
-- VS Code:
-  - `File > Open Folder...` and select this repo root.
-
-### 2) Build from terminal
-Run these commands at repo root:
-
-```powershell
+```bash
 dotnet restore
 dotnet build -c Release
 ```
 
-### 3) Run
+## Run
 
-```powershell
+```bash
 dotnet run
-```
-
-## 빠른 한국어 안내 (열기/빌드/실행)
-
-1. **어디서 열기**  
-   `FocusBuddy.csproj` 파일이 있는 폴더(현재 저장소 루트)를 Visual Studio 또는 VS Code에서 엽니다.
-
-2. **빌드** (저장소 루트 터미널)
-
-```powershell
-dotnet restore
-dotnet build -c Release
-```
-
-3. **실행**
-
-```powershell
-dotnet run
-```
-
-4. **실행 파일 위치(빌드 후)**
-
-```text
-bin/Release/net8.0-windows/
 ```
 
 ## Publish single-file executable
 
-```powershell
-dotnet publish -c Release -r win-x64 `
-  -p:PublishSingleFile=true `
-  -p:SelfContained=true `
+```bash
+dotnet publish -c Release -r win-x64 \
+  -p:PublishSingleFile=true \
+  -p:SelfContained=true \
   -p:IncludeNativeLibrariesForSelfExtract=true
 ```
 
