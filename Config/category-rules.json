@@ -1,0 +1,27 @@
+[
+  {
+    "category": "Browser",
+    "processNames": ["chrome.exe", "msedge.exe", "firefox.exe"],
+    "windowTitleKeywords": ["YouTube", "Reddit", "Wikipedia"]
+  },
+  {
+    "category": "IDE",
+    "processNames": ["devenv.exe", "code.exe", "rider64.exe"],
+    "windowTitleKeywords": ["Visual Studio", "JetBrains", "Solution"]
+  },
+  {
+    "category": "Communication",
+    "processNames": ["discord.exe", "slack.exe", "teams.exe"],
+    "windowTitleKeywords": ["Discord", "Slack", "Teams"]
+  },
+  {
+    "category": "Game",
+    "processNames": ["steam.exe", "epicgameslauncher.exe"],
+    "windowTitleKeywords": ["Game", "Play"]
+  },
+  {
+    "category": "Media",
+    "processNames": ["spotify.exe", "vlc.exe"],
+    "windowTitleKeywords": ["Spotify", "VLC"]
+  }
+]
