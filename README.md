@@ -1,0 +1,85 @@
+# FocusBuddy
+
+FocusBuddy is a production-structured Windows desktop utility for personal focus analytics.
+It tracks foreground window usage, categorizes activity, stores data in local SQLite, and offers a non-destructive Focus Mode.
+
+## Stack
+
+- .NET 8 WPF
+- MVVM via CommunityToolkit.Mvvm
+- SQLite via Microsoft.Data.Sqlite
+- Win32 API interop for foreground window tracking
+- LiveChartsCore for charts
+- Serilog file logging
+- DI via Microsoft.Extensions.DependencyInjection
+
+## Features
+
+- Automatic active-window tracking (1-second polling)
+- Category engine with JSON-driven rules
+- Dashboard:
+  - Today total usage time
+  - Pie chart by category
+  - Bar chart for last 7 days
+  - Top 5 apps today
+- Focus Mode:
+  - Reminder popup for blacklisted apps
+  - Optional auto-minimize for distracting apps
+- System tray operation:
+  - Open dashboard
+  - Toggle focus mode
+  - Exit app
+- Data location:
+  - Database: `%AppData%/FocusBuddy/focusbuddy.db`
+  - Settings: `%AppData%/FocusBuddy/settings.json`
+  - Logs: `%AppData%/FocusBuddy/focusbuddy.log`
+
+## Project Structure
+
+```text
+FocusBuddy/
+  Models/
+  ViewModels/
+  Views/
+  Services/
+  Data/
+  Helpers/
+  Config/
+```
+
+## Required NuGet Packages
+
+- CommunityToolkit.Mvvm
+- LiveChartsCore.SkiaSharpView.WPF
+- Microsoft.Data.Sqlite
+- Microsoft.Extensions.DependencyInjection
+- Serilog
+- Serilog.Sinks.File
+
+## Build
+
+```bash
+dotnet restore
+dotnet build -c Release
+```
+
+## Run
+
+```bash
+dotnet run
+```
+
+## Publish single-file executable
+
+```bash
+dotnet publish -c Release -r win-x64 \
+  -p:PublishSingleFile=true \
+  -p:SelfContained=true \
+  -p:IncludeNativeLibrariesForSelfExtract=true
+```
+
+Published output is located under:
+
+```text
+bin/Release/net8.0-windows/win-x64/publish/
+```
