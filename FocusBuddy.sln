@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36310.24 d17.14
+VisualStudioVersion = 17.14.36310.24
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FocusBuddy", "FocusBuddy.csproj", "{496AE94D-BD64-1426-895B-7B97AC664562}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "FocusBuddy Setup", "..\FocusBuddy Setup\FocusBuddy Setup.vdproj", "{2294678A-FC49-B324-4F5C-45011A991C4B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,8 @@ Global
 		{496AE94D-BD64-1426-895B-7B97AC664562}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{496AE94D-BD64-1426-895B-7B97AC664562}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{496AE94D-BD64-1426-895B-7B97AC664562}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2294678A-FC49-B324-4F5C-45011A991C4B}.Debug|Any CPU.ActiveCfg = Debug
+		{2294678A-FC49-B324-4F5C-45011A991C4B}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
