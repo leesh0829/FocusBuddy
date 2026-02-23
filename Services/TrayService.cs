@@ -1,6 +1,7 @@
 using System.Drawing;
 using System.Windows;
 using System.Windows.Forms;
+using WpfApplication = System.Windows.Application;
 
 namespace FocusBuddy.Services;
 
@@ -45,7 +46,7 @@ public sealed class TrayService : IDisposable
 
     private static void ShowMainWindow()
     {
-        var window = Application.Current.MainWindow;
+        var window = WpfApplication.Current.MainWindow;
         if (window is null)
         {
             return;
@@ -58,6 +59,6 @@ public sealed class TrayService : IDisposable
 
     private static void ExitApp()
     {
-        Application.Current.Shutdown();
+        WpfApplication.Current.Shutdown();
     }
 }

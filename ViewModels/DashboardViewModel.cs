@@ -1,7 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using FocusBuddy.Data;
-using LiveChartsCore;
-using LiveChartsCore.SkiaSharpView;
 
 namespace FocusBuddy.ViewModels;
 
@@ -13,10 +11,10 @@ public partial class DashboardViewModel : ObservableObject
     private string _todayTotalTime = "00:00:00";
 
     [ObservableProperty]
-    private IEnumerable<ISeries> _categorySeries = [];
+    private IEnumerable<string> _categoryBreakdown = [];
 
     [ObservableProperty]
-    private IEnumerable<ISeries> _weeklySeries = [];
+    private IEnumerable<string> _weeklyTotals = [];
 
     [ObservableProperty]
     private IEnumerable<string> _topApps = [];
@@ -32,20 +30,17 @@ public partial class DashboardViewModel : ObservableObject
         TodayTotalTime = TimeSpan.FromSeconds(totalSeconds).ToString("hh\\:mm\\:ss");
 
         var todayByCategory = await _databaseService.GetTodayByCategoryAsync();
-        CategorySeries = todayByCategory.Select(x => new PieSeries<int>
-        {
-            Name = x.Category,
-            Values = [x.DurationSeconds]
-        }).ToList();
+        CategoryBreakdown = todayByCategory
+            .OrderByDescending(x => x.DurationSeconds)
+            .Select(x => $"{x.Category}: {TimeSpan.FromSeconds(x.DurationSeconds):hh\\:mm\\:ss}")
+            .ToList();
 
         var weekData = await _databaseService.GetLast7DaysByCategoryAsync();
-        WeeklySeries = weekData
+        WeeklyTotals = weekData
             .GroupBy(x => x.Date)
-            .Select(x => new ColumnSeries<int>
-            {
-                Name = x.Key.ToString(),
-                Values = [x.Sum(y => y.DurationSeconds)]
-            }).ToList();
+            .OrderBy(x => x.Key)
+            .Select(x => $"{x.Key:yyyy-MM-dd}: {TimeSpan.FromSeconds(x.Sum(y => y.DurationSeconds)):hh\\:mm\\:ss}")
+            .ToList();
 
         var topApps = await _databaseService.GetTopAppsTodayAsync();
         TopApps = topApps.Select(x => $"{x.ProcessName} - {TimeSpan.FromSeconds(x.DurationSeconds):hh\\:mm\\:ss}").ToList();

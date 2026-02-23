@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Windows;
+using WpfApplication = System.Windows.Application;
 using FocusBuddy.Services;
 using FocusBuddy.ViewModels;
 
@@ -21,7 +22,7 @@ public partial class MainWindow : Window
 
     protected override void OnClosing(CancelEventArgs e)
     {
-        if (Application.Current.ShutdownMode == ShutdownMode.OnExplicitShutdown)
+        if (WpfApplication.Current.ShutdownMode == ShutdownMode.OnExplicitShutdown)
         {
             e.Cancel = true;
             Hide();

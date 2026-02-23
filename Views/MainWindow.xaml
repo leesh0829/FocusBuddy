@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
         mc:Ignorable="d"
         Title="FocusBuddy"
         Height="760"
@@ -48,14 +47,14 @@
                     <Border Grid.Column="0" Background="#2A2A2A" CornerRadius="8" Padding="12" Margin="0,0,8,0">
                         <StackPanel>
                             <TextBlock Text="Today by Category" FontSize="18" Margin="0,0,0,12"/>
-                            <lvc:PieChart Series="{Binding Dashboard.CategorySeries}" Height="280" />
+                            <ItemsControl ItemsSource="{Binding Dashboard.CategoryBreakdown}" />
                         </StackPanel>
                     </Border>
 
                     <Border Grid.Column="1" Background="#2A2A2A" CornerRadius="8" Padding="12" Margin="8,0,0,0">
                         <StackPanel>
                             <TextBlock Text="Last 7 Days" FontSize="18" Margin="0,0,0,12"/>
-                            <lvc:CartesianChart Series="{Binding Dashboard.WeeklySeries}" Height="280" />
+                            <ItemsControl ItemsSource="{Binding Dashboard.WeeklyTotals}" />
                         </StackPanel>
                     </Border>
                 </Grid>

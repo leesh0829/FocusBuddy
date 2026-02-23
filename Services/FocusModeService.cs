@@ -1,4 +1,5 @@
 using System.Windows;
+using WpfApplication = System.Windows.Application;
 using FocusBuddy.Helpers;
 using FocusBuddy.Models;
 
@@ -35,9 +36,9 @@ public sealed class FocusModeService
             return;
         }
 
-        Application.Current.Dispatcher.Invoke(() =>
+        WpfApplication.Current.Dispatcher.Invoke(() =>
         {
-            MessageBox.Show(
+            System.Windows.MessageBox.Show(
                 $"Focus reminder: {processName} is marked as distracting.\nWindow: {title}",
                 "FocusBuddy Reminder",
                 MessageBoxButton.OK,

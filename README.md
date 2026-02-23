@@ -9,7 +9,6 @@ It tracks foreground window usage, categorizes activity, stores data in local SQ
 - MVVM via CommunityToolkit.Mvvm
 - SQLite via Microsoft.Data.Sqlite
 - Win32 API interop for foreground window tracking
-- LiveChartsCore for charts
 - Serilog file logging
 - DI via Microsoft.Extensions.DependencyInjection
 
@@ -19,8 +18,8 @@ It tracks foreground window usage, categorizes activity, stores data in local SQ
 - Category engine with JSON-driven rules
 - Dashboard:
   - Today total usage time
-  - Pie chart by category
-  - Bar chart for last 7 days
+  - Category usage breakdown
+  - Last 7 days totals
   - Top 5 apps today
 - Focus Mode:
   - Reminder popup for blacklisted apps
@@ -50,7 +49,6 @@ FocusBuddy/
 ## Required NuGet Packages
 
 - CommunityToolkit.Mvvm
-- LiveChartsCore.SkiaSharpView.WPF
 - Microsoft.Data.Sqlite
 - Microsoft.Extensions.DependencyInjection
 - Serilog
