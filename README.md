@@ -67,6 +67,19 @@ dotnet build -c Release
 dotnet run
 ```
 
+## Build MSI installer (Visual Studio Installer Projects)
+
+1. Install the **Visual Studio Installer Projects** extension in Visual Studio.
+2. Open `FocusBuddy.sln` and set **Release** configuration.
+3. Build the `FocusBuddy Setup` project (or build the whole solution).
+4. The MSI will be generated at `Setup/Release/FocusBuddy.msi` (Debug build: `Setup/Debug/FocusBuddy.msi`).
+
+### Command line (Developer Command Prompt for VS)
+
+```bat
+devenv FocusBuddy.sln /Build Release
+```
+
 ## Publish single-file executable
 
 ```bash
