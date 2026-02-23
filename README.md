@@ -1,96 +1,91 @@
 # FocusBuddy
 
-FocusBuddy is a production-structured Windows desktop utility for personal focus analytics.
-It tracks foreground window usage, categorizes activity, stores data in local SQLite, and offers a non-destructive Focus Mode.
+> A friendly focus companion that shows where your day actually goes.
 
-## Stack
+**FocusBuddy** is a Windows desktop app that automatically tracks which apps you actively use,
+then helps you reduce distractions when it’s time to focus.
 
-- .NET 8 WPF
-- MVVM via CommunityToolkit.Mvvm
-- SQLite via Microsoft.Data.Sqlite
-- Win32 API interop for foreground window tracking
-- Serilog file logging
-- DI via Microsoft.Extensions.DependencyInjection
+It is designed less like a developer analytics tool and more like a
+**personal productivity partner you can use every day**.
 
-## Features
+---
 
-- Automatic active-window tracking (1-second polling)
-- Category engine with JSON-driven rules
-- Dashboard:
-  - Today total usage time
-  - Category usage breakdown
-  - Last 7 days totals
-  - Top 5 apps today
-- Focus Mode:
-  - Reminder popup for blacklisted apps
-  - Optional auto-minimize for distracting apps
-- System tray operation:
-  - Open dashboard
-  - Toggle focus mode
-  - Exit app
-- Data location:
-  - Database: `%AppData%/FocusBuddy/focusbuddy.db`
-  - Settings: `%AppData%/FocusBuddy/settings.json`
-  - Logs: `%AppData%/FocusBuddy/focusbuddy.log`
+## Why FocusBuddy?
 
-## Project Structure
+Use FocusBuddy if you want to:
 
-```text
-FocusBuddy/
-  Models/
-  ViewModels/
-  Views/
-  Services/
-  Data/
-  Helpers/
-  Config/
-```
+- catch the “just 5 minutes” pattern that turns into an hour on distracting apps
+- understand where your time went at the end of the day
+- stay on track during study or deep work sessions
+- improve productivity with real data, not just guesswork
 
-## Required NuGet Packages
+---
 
-- CommunityToolkit.Mvvm
-- Microsoft.Data.Sqlite
-- Microsoft.Extensions.DependencyInjection
-- Serilog
-- Serilog.Sinks.File
+## Core Features
 
-## Build
+### 1) Automatic activity tracking
+No start/stop timer needed. FocusBuddy tracks your active foreground window automatically.
+
+### 2) Category-based insights
+Your app usage is grouped into categories so you can quickly spot patterns like:
+- Work vs. Entertainment
+- Productive vs. Distracting time
+
+### 3) Clear daily dashboard
+- Total usage time today
+- Usage breakdown by category
+- Last 7 days trend
+- Top 5 most-used apps today
+
+### 4) Focus Mode
+When distracting apps are opened during focus time, FocusBuddy can:
+- show a reminder popup
+- optionally auto-minimize selected distracting apps
+
+### 5) System tray quick controls
+Run quietly in the background and control it from the tray:
+- Open Dashboard
+- Toggle Focus Mode
+- Exit App
+
+---
+
+## Who is it for?
+
+FocusBuddy is a great fit for:
+
+- students building consistent study routines
+- remote workers who want better attention control
+- anyone who feels “busy all day” but struggles to see real progress
+- users who want lightweight, automatic time-awareness without complexity
+
+---
+
+## Where is data stored?
+
+FocusBuddy stores data locally on your machine.
+
+- Database: `%AppData%/FocusBuddy/focusbuddy.db`
+- Settings: `%AppData%/FocusBuddy/settings.json`
+- Logs: `%AppData%/FocusBuddy/focusbuddy.log`
+
+---
+
+## Quick Start
 
 ```bash
 dotnet restore
 dotnet build -c Release
-```
-
-## Run
-
-```bash
 dotnet run
 ```
 
-## Build MSI installer (Visual Studio Installer Projects)
+---
 
-1. Install the **Visual Studio Installer Projects** extension in Visual Studio.
-2. Open `FocusBuddy.sln` and set **Release** configuration.
-3. Build the `FocusBuddy Setup` project (or build the whole solution).
-4. The MSI will be generated at `Setup/Release/FocusBuddy.msi` (Debug build: `Setup/Debug/FocusBuddy.msi`).
+## Tech Stack (brief)
 
-### Command line (Developer Command Prompt for VS)
+- .NET 8 WPF
+- MVVM (CommunityToolkit.Mvvm)
+- SQLite (Microsoft.Data.Sqlite)
+- Serilog
 
-```bat
-devenv FocusBuddy.sln /Build Release
-```
-
-## Publish single-file executable
-
-```bash
-dotnet publish -c Release -r win-x64 \
-  -p:PublishSingleFile=true \
-  -p:SelfContained=true \
-  -p:IncludeNativeLibrariesForSelfExtract=true
-```
-
-Published output is located under:
-
-```text
-bin/Release/net8.0-windows/win-x64/publish/
-```
+> More detailed developer architecture and deployment docs can be split into `docs/` later.
