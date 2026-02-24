@@ -41,6 +41,7 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private string _last7DaysText = string.Empty;
     [ObservableProperty] private string _topAppsTodayText = string.Empty;
     [ObservableProperty] private string _categoryRulesText = string.Empty;
+    [ObservableProperty] private string _categoryRulesHeaderText = string.Empty;
     [ObservableProperty] private string _addCategoryRuleText = string.Empty;
     [ObservableProperty] private string _removeCategoryRuleText = string.Empty;
     [ObservableProperty] private string _saveCategoryRulesText = string.Empty;
@@ -180,6 +181,7 @@ public partial class MainWindowViewModel : ObservableObject
             Last7DaysText = "최근 7일";
             TopAppsTodayText = "오늘 상위 5개 앱";
             CategoryRulesText = "카테고리 규칙";
+            CategoryRulesHeaderText = "앱/창 이름을 카테고리에 매핑해 대시보드 분류 기준을 설정하는 표입니다.";
             AddCategoryRuleText = "규칙 추가";
             RemoveCategoryRuleText = "선택 규칙 삭제";
             SaveCategoryRulesText = "카테고리 규칙 저장";
@@ -202,6 +204,7 @@ public partial class MainWindowViewModel : ObservableObject
         Last7DaysText = "Last 7 Days";
         TopAppsTodayText = "Top 5 Apps Today";
         CategoryRulesText = "Category Rules";
+        CategoryRulesHeaderText = "Use this table to map apps/window titles to categories used in dashboard summaries.";
         AddCategoryRuleText = "Add Rule";
         RemoveCategoryRuleText = "Remove Selected Rule";
         SaveCategoryRulesText = "Save Category Rules";

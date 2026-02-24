@@ -72,11 +72,31 @@
                 <Border Background="#2A2A2A" CornerRadius="8" Padding="12" Margin="0,14,0,0">
                     <StackPanel>
                         <TextBlock Text="{Binding CategoryRulesText}" FontSize="18" Margin="0,0,0,8"/>
+                        <TextBlock Text="{Binding CategoryRulesHeaderText}"
+                                   Foreground="#BFBFBF"
+                                   TextWrapping="Wrap"
+                                   Margin="0,0,0,8"/>
+                        <Grid Margin="0,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Background="#363636" Padding="8,6" BorderBrush="#4A4A4A" BorderThickness="0,0,1,1">
+                                <TextBlock Text="{Binding CategoryColumnText}" FontWeight="SemiBold"/>
+                            </Border>
+                            <Border Grid.Column="1" Background="#363636" Padding="8,6" BorderBrush="#4A4A4A" BorderThickness="0,0,1,1">
+                                <TextBlock Text="{Binding ProcessColumnText}" FontWeight="SemiBold"/>
+                            </Border>
+                            <Border Grid.Column="2" Background="#363636" Padding="8,6" BorderBrush="#4A4A4A" BorderThickness="0,0,0,1">
+                                <TextBlock Text="{Binding KeywordsColumnText}" FontWeight="SemiBold"/>
+                            </Border>
+                        </Grid>
                         <DataGrid ItemsSource="{Binding CategoryRules}"
                                   SelectedItem="{Binding SelectedCategoryRule}"
                                   AutoGenerateColumns="False"
                                   CanUserAddRows="False"
-                                  HeadersVisibility="Column"
+                                  HeadersVisibility="None"
                                   MinHeight="180"
                                   Margin="0,0,0,8">
                             <DataGrid.Columns>
