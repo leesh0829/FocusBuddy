@@ -1,6 +1,7 @@
 using System.IO;
 using System.Threading;
 using System.Windows;
+using Wpf = System.Windows;
 using FocusBuddy.Data;
 using FocusBuddy.Services;
 using FocusBuddy.ViewModels;
@@ -25,11 +26,11 @@ public partial class App : Wpf.Application
             _singleInstanceMutex.Dispose();
             _singleInstanceMutex = null;
 
-            MessageBox.Show(
+            Wpf.MessageBox.Show(
                 "FocusBuddy is already running.",
                 "FocusBuddy",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
+                Wpf.MessageBoxButton.OK,
+                Wpf.MessageBoxImage.Information);
             Shutdown();
             return;
         }
