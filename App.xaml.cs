@@ -1,5 +1,5 @@
 using System.IO;
-using System.Windows;
+using Wpf = System.Windows;
 using FocusBuddy.Data;
 using FocusBuddy.Services;
 using FocusBuddy.ViewModels;
@@ -9,33 +9,42 @@ using Serilog;
 
 namespace FocusBuddy;
 
-public partial class App : System.Windows.Application
+public partial class App : Wpf.Application
 {
     private ServiceProvider? _serviceProvider;
 
-    protected override async void OnStartup(StartupEventArgs e)
+    protected override async void OnStartup(Wpf.StartupEventArgs e)
     {
         base.OnStartup(e);
 
-        ConfigureLogging();
-        var services = new ServiceCollection();
-        ConfigureServices(services);
-        _serviceProvider = services.BuildServiceProvider();
+        try
+        {
+            ConfigureLogging();
+            var services = new ServiceCollection();
+            ConfigureServices(services);
+            _serviceProvider = services.BuildServiceProvider();
 
-        var databaseService = _serviceProvider.GetRequiredService<DatabaseService>();
-        await databaseService.InitializeAsync();
+            var databaseService = _serviceProvider.GetRequiredService<DatabaseService>();
+            await databaseService.InitializeAsync();
 
-        var trackingService = _serviceProvider.GetRequiredService<WindowTrackingService>();
-        var trayService = _serviceProvider.GetRequiredService<TrayService>();
+            var trackingService = _serviceProvider.GetRequiredService<WindowTrackingService>();
+            var trayService = _serviceProvider.GetRequiredService<TrayService>();
 
-        await trackingService.StartAsync();
-        trayService.Initialize();
+            await trackingService.StartAsync();
+            trayService.Initialize();
 
-        var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
-        mainWindow.Show();
+            var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
+            mainWindow.Show();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Application startup failed");
+            Wpf.MessageBox.Show($"앱 시작 중 오류가 발생했습니다.\n{ex.Message}", "FocusBuddy", Wpf.MessageBoxButton.OK, Wpf.MessageBoxImage.Error);
+            Shutdown(-1);
+        }
     }
 
-    protected override async void OnExit(ExitEventArgs e)
+    protected override async void OnExit(Wpf.ExitEventArgs e)
     {
         if (_serviceProvider is not null)
         {
