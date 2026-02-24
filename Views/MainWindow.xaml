@@ -48,11 +48,29 @@
                 <TextBlock Text="{Binding BlacklistLabelText}" Margin="0,12,0,6"/>
                 <Button Content="{Binding RefreshProgramListText}" Command="{Binding RefreshRunningProgramsCommand}" Margin="0,0,0,8"/>
                 <TextBlock Text="{Binding BlacklistAvailableProgramsText}" Margin="0,0,0,4"/>
-                <ComboBox ItemsSource="{Binding RunningPrograms}" SelectedItem="{Binding SelectedRunningProgramForBlacklist}" Margin="0,0,0,6"/>
+                <ComboBox ItemsSource="{Binding RunningPrograms}" SelectedItem="{Binding SelectedRunningProgramForBlacklist}" Margin="0,0,0,6">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="{Binding Icon}" Width="16" Height="16" Margin="0,0,6,0"/>
+                                <TextBlock Text="{Binding ProcessName}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
                 <Button Content="{Binding AddProgramText}" Command="{Binding AddBlacklistProgramCommand}" Margin="0,0,0,8"/>
 
                 <TextBlock Text="{Binding BlacklistSelectedProgramsText}" Margin="0,0,0,4"/>
-                <ListBox ItemsSource="{Binding FocusModeBlacklistPrograms}" SelectedItem="{Binding SelectedBlacklistProgram}" Height="120" Margin="0,0,0,6"/>
+                <ListBox ItemsSource="{Binding FocusModeBlacklistPrograms}" SelectedItem="{Binding SelectedBlacklistProgram}" Height="120" Margin="0,0,0,6">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="{Binding Icon}" Width="16" Height="16" Margin="0,0,6,0"/>
+                                <TextBlock Text="{Binding ProcessName}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
                 <Button Content="{Binding RemoveProgramText}" Command="{Binding RemoveBlacklistProgramCommand}" Margin="0,0,0,8"/>
 
                 <Button Content="{Binding SaveFocusSettingsText}" Command="{Binding SaveFocusSettingsCommand}" Margin="0,10,0,0"/>
@@ -142,11 +160,29 @@
 
                         <TextBlock Text="{Binding RuleSelectedProgramsText}" Margin="0,0,0,4"/>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                            <ComboBox Width="260" ItemsSource="{Binding RunningPrograms}" SelectedItem="{Binding SelectedRunningProgramForRule}" Margin="0,0,8,0"/>
+                            <ComboBox Width="260" ItemsSource="{Binding RunningPrograms}" SelectedItem="{Binding SelectedRunningProgramForRule}" Margin="0,0,8,0">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Image Source="{Binding Icon}" Width="16" Height="16" Margin="0,0,6,0"/>
+                                            <TextBlock Text="{Binding ProcessName}" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
                             <Button Content="{Binding AddProgramText}" Command="{Binding AddProgramToSelectedCategoryRuleCommand}"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                            <ListBox ItemsSource="{Binding SelectedCategoryRulePrograms}" SelectedItem="{Binding SelectedRuleProgram}" Height="90" Width="260" Margin="0,0,8,0"/>
+                            <ListBox ItemsSource="{Binding SelectedCategoryRulePrograms}" SelectedItem="{Binding SelectedRuleProgram}" Height="90" Width="260" Margin="0,0,8,0">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Image Source="{Binding Icon}" Width="16" Height="16" Margin="0,0,6,0"/>
+                                            <TextBlock Text="{Binding ProcessName}" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
                             <Button Content="{Binding RemoveProgramText}" Command="{Binding RemoveProgramFromSelectedCategoryRuleCommand}" VerticalAlignment="Center"/>
                         </StackPanel>
 
