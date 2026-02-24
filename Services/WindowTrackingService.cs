@@ -19,6 +19,9 @@ public sealed class WindowTrackingService
     private string _currentTitle = string.Empty;
     private string _currentCategory = "Other";
     private DateTime _sessionStartUtc;
+    private DateTime? _lastTickUtc;
+
+    private static readonly TimeSpan SleepGapThreshold = TimeSpan.FromSeconds(10);
 
     public event EventHandler? UsageUpdated;
 
@@ -37,6 +40,7 @@ public sealed class WindowTrackingService
         }
 
         _cts = new CancellationTokenSource();
+        _lastTickUtc = null;
         _pollingTask = Task.Run(() => PollingLoopAsync(_cts.Token));
         return Task.CompletedTask;
     }
@@ -52,6 +56,7 @@ public sealed class WindowTrackingService
         await _pollingTask;
         await CloseCurrentSessionAsync(DateTime.UtcNow);
         _pollingTask = null;
+        _lastTickUtc = null;
         _cts.Dispose();
         _cts = null;
     }
@@ -62,7 +67,18 @@ public sealed class WindowTrackingService
         {
             try
             {
+                var nowUtc = DateTime.UtcNow;
+                if (_lastTickUtc is not null)
+                {
+                    var gap = nowUtc - _lastTickUtc.Value;
+                    if (gap > SleepGapThreshold)
+                    {
+                        HandleSleepGap(gap);
+                    }
+                }
+
                 await TrackTickAsync();
+                _lastTickUtc = nowUtc;
             }
             catch (Exception ex)
             {
@@ -128,6 +144,16 @@ public sealed class WindowTrackingService
         _currentProcess = string.Empty;
         _currentTitle = string.Empty;
         _currentCategory = "Other";
+    }
+
+    private void HandleSleepGap(TimeSpan gap)
+    {
+        if (_currentWindowHandle == IntPtr.Zero || _sessionStartUtc == default)
+        {
+            return;
+        }
+
+        _sessionStartUtc = _sessionStartUtc.Add(gap);
     }
 
     private static string ResolveProcessName(IntPtr windowHandle)
