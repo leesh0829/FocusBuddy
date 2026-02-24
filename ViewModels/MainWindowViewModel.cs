@@ -11,6 +11,7 @@ public partial class MainWindowViewModel : ObservableObject
 {
     private const string English = "en";
     private const string Korean = "ko";
+    private const string SelfProcessName = "focusbuddy.exe";
 
     private readonly DashboardViewModel _dashboardViewModel;
     private readonly FocusModeService _focusModeService;
@@ -128,6 +129,11 @@ public partial class MainWindowViewModel : ObservableObject
             return;
         }
 
+        if (string.Equals(SelectedRunningProgramForBlacklist, SelfProcessName, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
         AddUnique(FocusModeBlacklistPrograms, SelectedRunningProgramForBlacklist);
     }
 
@@ -180,7 +186,18 @@ public partial class MainWindowViewModel : ObservableObject
     {
         _settings.FocusModeEnabled = IsFocusModeEnabled;
         _settings.AutoMinimizeDistractingApps = AutoMinimizeDistractingApps;
-        _settings.FocusModeBlacklist = FocusModeBlacklistPrograms.ToList();
+
+        var filteredBlacklist = FocusModeBlacklistPrograms
+            .Where(x => !string.Equals(x, SelfProcessName, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        FocusModeBlacklistPrograms.Clear();
+        foreach (var processName in filteredBlacklist)
+        {
+            FocusModeBlacklistPrograms.Add(processName);
+        }
+
+        _settings.FocusModeBlacklist = filteredBlacklist;
 
         await _focusModeService.SaveSettingsAsync(_settings);
     }
@@ -254,6 +271,11 @@ public partial class MainWindowViewModel : ObservableObject
         FocusModeBlacklistPrograms.Clear();
         foreach (var processName in settings.FocusModeBlacklist)
         {
+            if (string.Equals(processName, SelfProcessName, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
             AddUnique(FocusModeBlacklistPrograms, processName);
         }
 
