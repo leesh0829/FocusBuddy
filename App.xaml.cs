@@ -1,4 +1,5 @@
 using System.IO;
+using System.Threading;
 using System.Windows;
 using FocusBuddy.Data;
 using FocusBuddy.Services;
@@ -11,10 +12,28 @@ namespace FocusBuddy;
 
 public partial class App : System.Windows.Application
 {
+    private const string SingleInstanceMutexName = "Global\\FocusBuddy.SingleInstance";
+
     private ServiceProvider? _serviceProvider;
+    private Mutex? _singleInstanceMutex;
 
     protected override async void OnStartup(StartupEventArgs e)
     {
+        _singleInstanceMutex = new Mutex(initiallyOwned: true, SingleInstanceMutexName, out var isFirstInstance);
+        if (!isFirstInstance)
+        {
+            _singleInstanceMutex.Dispose();
+            _singleInstanceMutex = null;
+
+            MessageBox.Show(
+                "FocusBuddy is already running.",
+                "FocusBuddy",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+            Shutdown();
+            return;
+        }
+
         base.OnStartup(e);
 
         ConfigureLogging();
@@ -46,6 +65,13 @@ public partial class App : System.Windows.Application
             trayService.Dispose();
 
             await _serviceProvider.DisposeAsync();
+        }
+
+        if (_singleInstanceMutex is not null)
+        {
+            _singleInstanceMutex.ReleaseMutex();
+            _singleInstanceMutex.Dispose();
+            _singleInstanceMutex = null;
         }
 
         Log.CloseAndFlush();
