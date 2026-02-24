@@ -165,7 +165,12 @@ public partial class MainWindowViewModel : ObservableObject
         }
 
         var programs = SplitCsv(SelectedCategoryRule.ProcessNames);
-        programs.RemoveAll(x => string.Equals(x, SelectedRuleProgram, StringComparison.OrdinalIgnoreCase));
+        var removed = programs.RemoveAll(x => string.Equals(x, SelectedRuleProgram, StringComparison.OrdinalIgnoreCase));
+        if (removed == 0)
+        {
+            return;
+        }
+
         SelectedCategoryRule.ProcessNames = string.Join(", ", programs);
         RefreshSelectedRulePrograms();
     }
@@ -229,6 +234,7 @@ public partial class MainWindowViewModel : ObservableObject
 
     private void RefreshSelectedRulePrograms()
     {
+        SelectedRuleProgram = null;
         SelectedCategoryRulePrograms.Clear();
         if (SelectedCategoryRule is null)
         {

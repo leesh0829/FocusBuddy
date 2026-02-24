@@ -123,12 +123,14 @@
                         </DataGrid>
 
                         <TextBlock Text="{Binding RuleSelectedProgramsText}" Margin="0,0,0,4"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
                             <ComboBox Width="260" ItemsSource="{Binding RunningPrograms}" SelectedItem="{Binding SelectedRunningProgramForRule}" Margin="0,0,8,0"/>
-                            <Button Content="{Binding AddProgramText}" Command="{Binding AddProgramToSelectedCategoryRuleCommand}" Margin="0,0,8,0"/>
-                            <Button Content="{Binding RemoveProgramText}" Command="{Binding RemoveProgramFromSelectedCategoryRuleCommand}"/>
+                            <Button Content="{Binding AddProgramText}" Command="{Binding AddProgramToSelectedCategoryRuleCommand}"/>
                         </StackPanel>
-                        <ListBox ItemsSource="{Binding SelectedCategoryRulePrograms}" SelectedItem="{Binding SelectedRuleProgram}" Height="90" Margin="0,0,0,8"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <ListBox ItemsSource="{Binding SelectedCategoryRulePrograms}" SelectedItem="{Binding SelectedRuleProgram}" Height="90" Width="260" Margin="0,0,8,0"/>
+                            <Button Content="{Binding RemoveProgramText}" Command="{Binding RemoveProgramFromSelectedCategoryRuleCommand}" VerticalAlignment="Center"/>
+                        </StackPanel>
 
                         <StackPanel Orientation="Horizontal">
                             <Button Content="{Binding AddCategoryRuleText}" Command="{Binding AddCategoryRuleCommand}" Margin="0,0,8,0"/>
