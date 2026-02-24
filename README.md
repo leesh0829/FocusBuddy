@@ -71,6 +71,27 @@ FocusBuddy stores data locally on your machine.
 
 ---
 
+## Reset Setup (if install/build keeps failing)
+
+If you deleted generated files or your local install is in a broken state, run:
+
+```powershell
+pwsh ./scripts/reset-setup.ps1
+```
+
+Optional: also wipe local app data (`%AppData%/FocusBuddy`) and rebuild cleanly:
+
+```powershell
+pwsh ./scripts/reset-setup.ps1 -CleanUserData
+```
+
+This script will:
+- remove `bin/` and `obj/` folders
+- clear NuGet caches
+- run `dotnet restore` and `dotnet build -c Release`
+
+---
+
 ## Quick Start
 
 ```bash
