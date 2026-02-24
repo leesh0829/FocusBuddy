@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using FocusBuddy.Models;
 using FocusBuddy.Services;
 
@@ -23,10 +24,22 @@ public partial class MainWindowViewModel : ObservableObject
     private bool _autoMinimizeDistractingApps;
 
     [ObservableProperty]
-    private string _blacklistRaw = string.Empty;
+    private string _selectedLanguage = English;
 
     [ObservableProperty]
-    private string _selectedLanguage = English;
+    private CategoryRuleEditorViewModel? _selectedCategoryRule;
+
+    [ObservableProperty]
+    private string? _selectedRunningProgramForBlacklist;
+
+    [ObservableProperty]
+    private string? _selectedBlacklistProgram;
+
+    [ObservableProperty]
+    private string? _selectedRunningProgramForRule;
+
+    [ObservableProperty]
+    private string? _selectedRuleProgram;
 
     [ObservableProperty] private string _subtitleText = string.Empty;
     [ObservableProperty] private string _refreshDashboardText = string.Empty;
@@ -35,6 +48,12 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private string _enableFocusModeText = string.Empty;
     [ObservableProperty] private string _autoMinimizeText = string.Empty;
     [ObservableProperty] private string _blacklistLabelText = string.Empty;
+    [ObservableProperty] private string _blacklistAvailableProgramsText = string.Empty;
+    [ObservableProperty] private string _blacklistSelectedProgramsText = string.Empty;
+    [ObservableProperty] private string _ruleSelectedProgramsText = string.Empty;
+    [ObservableProperty] private string _refreshProgramListText = string.Empty;
+    [ObservableProperty] private string _addProgramText = string.Empty;
+    [ObservableProperty] private string _removeProgramText = string.Empty;
     [ObservableProperty] private string _saveFocusSettingsText = string.Empty;
     [ObservableProperty] private string _todayTotalText = string.Empty;
     [ObservableProperty] private string _todayByCategoryText = string.Empty;
@@ -53,9 +72,9 @@ public partial class MainWindowViewModel : ObservableObject
 
     public DashboardViewModel Dashboard => _dashboardViewModel;
     public ObservableCollection<CategoryRuleEditorViewModel> CategoryRules { get; } = [];
-
-    [ObservableProperty]
-    private CategoryRuleEditorViewModel? _selectedCategoryRule;
+    public ObservableCollection<string> RunningPrograms { get; } = [];
+    public ObservableCollection<string> FocusModeBlacklistPrograms { get; } = [];
+    public ObservableCollection<string> SelectedCategoryRulePrograms { get; } = [];
 
     public MainWindowViewModel(DashboardViewModel dashboardViewModel, FocusModeService focusModeService, CategoryService categoryService)
     {
@@ -67,6 +86,8 @@ public partial class MainWindowViewModel : ObservableObject
         {
             CategoryRules.Add(ToEditorRule(rule));
         }
+
+        RefreshRunningPrograms();
     }
 
     public async Task InitializeAsync()
@@ -83,13 +104,78 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void RefreshRunningPrograms()
+    {
+        var processes = Process.GetProcesses()
+            .Where(x => !string.IsNullOrWhiteSpace(x.ProcessName))
+            .Select(x => x.ProcessName.ToLowerInvariant() + ".exe")
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(x => x)
+            .ToList();
+
+        RunningPrograms.Clear();
+        foreach (var process in processes)
+        {
+            RunningPrograms.Add(process);
+        }
+    }
+
+    [RelayCommand]
+    private void AddBlacklistProgram()
+    {
+        if (string.IsNullOrWhiteSpace(SelectedRunningProgramForBlacklist))
+        {
+            return;
+        }
+
+        AddUnique(FocusModeBlacklistPrograms, SelectedRunningProgramForBlacklist);
+    }
+
+    [RelayCommand]
+    private void RemoveBlacklistProgram()
+    {
+        if (string.IsNullOrWhiteSpace(SelectedBlacklistProgram))
+        {
+            return;
+        }
+
+        FocusModeBlacklistPrograms.Remove(SelectedBlacklistProgram);
+    }
+
+    [RelayCommand]
+    private void AddProgramToSelectedCategoryRule()
+    {
+        if (SelectedCategoryRule is null || string.IsNullOrWhiteSpace(SelectedRunningProgramForRule))
+        {
+            return;
+        }
+
+        var programs = SplitCsv(SelectedCategoryRule.ProcessNames);
+        AddUnique(programs, SelectedRunningProgramForRule);
+        SelectedCategoryRule.ProcessNames = string.Join(", ", programs);
+        RefreshSelectedRulePrograms();
+    }
+
+    [RelayCommand]
+    private void RemoveProgramFromSelectedCategoryRule()
+    {
+        if (SelectedCategoryRule is null || string.IsNullOrWhiteSpace(SelectedRuleProgram))
+        {
+            return;
+        }
+
+        var programs = SplitCsv(SelectedCategoryRule.ProcessNames);
+        programs.RemoveAll(x => string.Equals(x, SelectedRuleProgram, StringComparison.OrdinalIgnoreCase));
+        SelectedCategoryRule.ProcessNames = string.Join(", ", programs);
+        RefreshSelectedRulePrograms();
+    }
+
+    [RelayCommand]
     private async Task SaveFocusSettingsAsync()
     {
         _settings.FocusModeEnabled = IsFocusModeEnabled;
         _settings.AutoMinimizeDistractingApps = AutoMinimizeDistractingApps;
-        _settings.FocusModeBlacklist = BlacklistRaw
-            .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .ToList();
+        _settings.FocusModeBlacklist = FocusModeBlacklistPrograms.ToList();
 
         await _focusModeService.SaveSettingsAsync(_settings);
     }
@@ -116,6 +202,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         CategoryRules.Remove(SelectedCategoryRule);
         SelectedCategoryRule = null;
+        SelectedCategoryRulePrograms.Clear();
     }
 
     [RelayCommand]
@@ -135,11 +222,35 @@ public partial class MainWindowViewModel : ObservableObject
         await Dashboard.RefreshAsync();
     }
 
+    partial void OnSelectedCategoryRuleChanged(CategoryRuleEditorViewModel? value)
+    {
+        RefreshSelectedRulePrograms();
+    }
+
+    private void RefreshSelectedRulePrograms()
+    {
+        SelectedCategoryRulePrograms.Clear();
+        if (SelectedCategoryRule is null)
+        {
+            return;
+        }
+
+        foreach (var program in SplitCsv(SelectedCategoryRule.ProcessNames))
+        {
+            SelectedCategoryRulePrograms.Add(program);
+        }
+    }
+
     private void BindSettings(AppSettings settings)
     {
         IsFocusModeEnabled = settings.FocusModeEnabled;
         AutoMinimizeDistractingApps = settings.AutoMinimizeDistractingApps;
-        BlacklistRaw = string.Join(Environment.NewLine, settings.FocusModeBlacklist);
+        FocusModeBlacklistPrograms.Clear();
+        foreach (var processName in settings.FocusModeBlacklist)
+        {
+            AddUnique(FocusModeBlacklistPrograms, processName);
+        }
+
         SelectedLanguage = settings.UiLanguage is Korean ? Korean : English;
         ApplyLocalization(SelectedLanguage);
     }
@@ -174,7 +285,13 @@ public partial class MainWindowViewModel : ObservableObject
             FocusModeTitleText = "집중 모드";
             EnableFocusModeText = "집중 모드 사용";
             AutoMinimizeText = "방해 앱 자동 최소화";
-            BlacklistLabelText = "블랙리스트 (프로세스당 한 줄):";
+            BlacklistLabelText = "블랙리스트 프로그램";
+            BlacklistAvailableProgramsText = "현재 실행 중 프로그램";
+            BlacklistSelectedProgramsText = "선택된 블랙리스트";
+            RuleSelectedProgramsText = "선택 규칙의 프로그램";
+            RefreshProgramListText = "프로그램 목록 새로고침";
+            AddProgramText = "추가";
+            RemoveProgramText = "제거";
             SaveFocusSettingsText = "집중 설정 저장";
             TodayTotalText = "오늘 총 사용 시간";
             TodayByCategoryText = "오늘 카테고리별";
@@ -186,7 +303,7 @@ public partial class MainWindowViewModel : ObservableObject
             RemoveCategoryRuleText = "선택 규칙 삭제";
             SaveCategoryRulesText = "카테고리 규칙 저장";
             CategoryColumnText = "카테고리";
-            ProcessColumnText = "프로세스(.exe, 쉼표 구분)";
+            ProcessColumnText = "프로세스(선택 목록)";
             KeywordsColumnText = "제목 키워드(쉼표 구분)";
             return;
         }
@@ -197,7 +314,13 @@ public partial class MainWindowViewModel : ObservableObject
         FocusModeTitleText = "Focus Mode";
         EnableFocusModeText = "Enable Focus Mode";
         AutoMinimizeText = "Auto-minimize distracting apps";
-        BlacklistLabelText = "Blacklist (one process per line):";
+        BlacklistLabelText = "Blacklist Programs";
+        BlacklistAvailableProgramsText = "Currently Running Programs";
+        BlacklistSelectedProgramsText = "Selected Blacklist";
+        RuleSelectedProgramsText = "Programs in Selected Rule";
+        RefreshProgramListText = "Refresh Program List";
+        AddProgramText = "Add";
+        RemoveProgramText = "Remove";
         SaveFocusSettingsText = "Save Focus Settings";
         TodayTotalText = "Today Total";
         TodayByCategoryText = "Today by Category";
@@ -209,7 +332,7 @@ public partial class MainWindowViewModel : ObservableObject
         RemoveCategoryRuleText = "Remove Selected Rule";
         SaveCategoryRulesText = "Save Category Rules";
         CategoryColumnText = "Category";
-        ProcessColumnText = "Processes (.exe, comma-separated)";
+        ProcessColumnText = "Processes (selected list)";
         KeywordsColumnText = "Window Title Keywords (comma-separated)";
     }
 
@@ -227,6 +350,15 @@ public partial class MainWindowViewModel : ObservableObject
     {
         return value
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
+    }
+
+    private static void AddUnique(ICollection<string> items, string value)
+    {
+        if (!items.Contains(value, StringComparer.OrdinalIgnoreCase))
+        {
+            items.Add(value);
+        }
     }
 }
