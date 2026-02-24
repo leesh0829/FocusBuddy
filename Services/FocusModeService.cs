@@ -7,6 +7,7 @@ namespace FocusBuddy.Services;
 
 public sealed class FocusModeService
 {
+    private const string SelfProcessName = "focusbuddy.exe";
     private readonly SettingsService _settingsService;
     private AppSettings _settings = new();
 
@@ -27,6 +28,11 @@ public sealed class FocusModeService
     public void HandleActiveWindow(IntPtr hwnd, string processName, string title)
     {
         if (!_settings.FocusModeEnabled)
+        {
+            return;
+        }
+
+        if (string.Equals(processName, SelfProcessName, StringComparison.OrdinalIgnoreCase))
         {
             return;
         }

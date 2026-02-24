@@ -9,7 +9,7 @@
         Width="1200">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="240" />
+            <ColumnDefinition Width="280" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
@@ -24,10 +24,55 @@
                 <ComboBox ItemsSource="{Binding LanguageOptions}" SelectedItem="{Binding SelectedLanguage}" Margin="0,0,0,10" />
 
                 <TextBlock Text="{Binding FocusModeTitleText}" FontSize="18" Margin="0,0,0,8" />
-                <CheckBox IsChecked="{Binding IsFocusModeEnabled}" Content="{Binding EnableFocusModeText}" Margin="0,4" Foreground="White"/>
-                <CheckBox IsChecked="{Binding AutoMinimizeDistractingApps}" Content="{Binding AutoMinimizeText}" Margin="0,4" Foreground="White"/>
+                <CheckBox IsChecked="{Binding IsFocusModeEnabled}"
+                          Content="{Binding EnableFocusModeText}"
+                          Margin="0,4"
+                          Foreground="White">
+                    <CheckBox.ToolTip>
+                        <ToolTip Background="White" Foreground="Black">
+                            <TextBlock Text="{Binding EnableFocusModeTooltipText}" Foreground="Black" TextWrapping="Wrap" MaxWidth="260"/>
+                        </ToolTip>
+                    </CheckBox.ToolTip>
+                </CheckBox>
+                <CheckBox IsChecked="{Binding AutoMinimizeDistractingApps}"
+                          Content="{Binding AutoMinimizeText}"
+                          Margin="0,4"
+                          Foreground="White">
+                    <CheckBox.ToolTip>
+                        <ToolTip Background="White" Foreground="Black">
+                            <TextBlock Text="{Binding AutoMinimizeTooltipText}" Foreground="Black" TextWrapping="Wrap" MaxWidth="260"/>
+                        </ToolTip>
+                    </CheckBox.ToolTip>
+                </CheckBox>
+
                 <TextBlock Text="{Binding BlacklistLabelText}" Margin="0,12,0,6"/>
-                <TextBox Text="{Binding BlacklistRaw}" AcceptsReturn="True" Height="170" Background="#333" Foreground="White" BorderThickness="0"/>
+                <Button Content="{Binding RefreshProgramListText}" Command="{Binding RefreshRunningProgramsCommand}" Margin="0,0,0,8"/>
+                <TextBlock Text="{Binding BlacklistAvailableProgramsText}" Margin="0,0,0,4"/>
+                <ComboBox ItemsSource="{Binding RunningPrograms}" SelectedItem="{Binding SelectedRunningProgramForBlacklist}" Margin="0,0,0,6">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="{Binding Icon}" Width="16" Height="16" Margin="0,0,6,0"/>
+                                <TextBlock Text="{Binding ProcessName}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <Button Content="{Binding AddProgramText}" Command="{Binding AddBlacklistProgramCommand}" Margin="0,0,0,8"/>
+
+                <TextBlock Text="{Binding BlacklistSelectedProgramsText}" Margin="0,0,0,4"/>
+                <ListBox ItemsSource="{Binding FocusModeBlacklistPrograms}" SelectedItem="{Binding SelectedBlacklistProgram}" Height="120" Margin="0,0,0,6">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="{Binding Icon}" Width="16" Height="16" Margin="0,0,6,0"/>
+                                <TextBlock Text="{Binding ProcessName}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <Button Content="{Binding RemoveProgramText}" Command="{Binding RemoveBlacklistProgramCommand}" Margin="0,0,0,8"/>
+
                 <Button Content="{Binding SaveFocusSettingsText}" Command="{Binding SaveFocusSettingsCommand}" Margin="0,10,0,0"/>
             </StackPanel>
         </Border>
@@ -72,13 +117,80 @@
                 <Border Background="#2A2A2A" CornerRadius="8" Padding="12" Margin="0,14,0,0">
                     <StackPanel>
                         <TextBlock Text="{Binding CategoryRulesText}" FontSize="18" Margin="0,0,0,8"/>
-                        <ItemsControl ItemsSource="{Binding CategoryRules}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Category}" Margin="0,2"/>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <TextBlock Text="{Binding CategoryRulesHeaderText}"
+                                   Foreground="#BFBFBF"
+                                   TextWrapping="Wrap"
+                                   Margin="0,0,0,8"/>
+                        <Grid Margin="0,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Background="#363636" Padding="8,6" BorderBrush="#4A4A4A" BorderThickness="0,0,1,1">
+                                <TextBlock Text="{Binding CategoryColumnText}" FontWeight="SemiBold"/>
+                            </Border>
+                            <Border Grid.Column="1" Background="#363636" Padding="8,6" BorderBrush="#4A4A4A" BorderThickness="0,0,1,1">
+                                <TextBlock Text="{Binding ProcessColumnText}" FontWeight="SemiBold"/>
+                            </Border>
+                            <Border Grid.Column="2" Background="#363636" Padding="8,6" BorderBrush="#4A4A4A" BorderThickness="0,0,0,1">
+                                <TextBlock Text="{Binding KeywordsColumnText}" FontWeight="SemiBold"/>
+                            </Border>
+                        </Grid>
+                        <DataGrid ItemsSource="{Binding CategoryRules}"
+                                  SelectedItem="{Binding SelectedCategoryRule}"
+                                  AutoGenerateColumns="False"
+                                  CanUserAddRows="False"
+                                  HeadersVisibility="None"
+                                  MinHeight="180"
+                                  Margin="0,0,0,8">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="{Binding DataContext.CategoryColumnText, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    Binding="{Binding Category, UpdateSourceTrigger=PropertyChanged}"
+                                                    Width="180"/>
+                                <DataGridTextColumn Header="{Binding DataContext.ProcessColumnText, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    Binding="{Binding ProcessNames}"
+                                                    IsReadOnly="True"
+                                                    Width="*"/>
+                                <DataGridTextColumn Header="{Binding DataContext.KeywordsColumnText, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    Binding="{Binding WindowTitleKeywords, UpdateSourceTrigger=PropertyChanged}"
+                                                    Width="*"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <TextBlock Text="{Binding RuleSelectedProgramsText}" Margin="0,0,0,4"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <ComboBox Width="260" ItemsSource="{Binding RunningPrograms}" SelectedItem="{Binding SelectedRunningProgramForRule}" Margin="0,0,8,0">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Image Source="{Binding Icon}" Width="16" Height="16" Margin="0,0,6,0"/>
+                                            <TextBlock Text="{Binding ProcessName}" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                            <Button Content="{Binding AddProgramText}" Command="{Binding AddProgramToSelectedCategoryRuleCommand}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <ListBox ItemsSource="{Binding SelectedCategoryRulePrograms}" SelectedItem="{Binding SelectedRuleProgram}" Height="90" Width="260" Margin="0,0,8,0">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Image Source="{Binding Icon}" Width="16" Height="16" Margin="0,0,6,0"/>
+                                            <TextBlock Text="{Binding ProcessName}" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                            <Button Content="{Binding RemoveProgramText}" Command="{Binding RemoveProgramFromSelectedCategoryRuleCommand}" VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="{Binding AddCategoryRuleText}" Command="{Binding AddCategoryRuleCommand}" Margin="0,0,8,0"/>
+                            <Button Content="{Binding RemoveCategoryRuleText}" Command="{Binding RemoveCategoryRuleCommand}" Margin="0,0,8,0"/>
+                            <Button Content="{Binding SaveCategoryRulesText}" Command="{Binding SaveCategoryRulesCommand}"/>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
             </StackPanel>
