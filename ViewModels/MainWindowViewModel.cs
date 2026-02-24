@@ -2,6 +2,11 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Windows;
+using System.Windows.Interop;
+using System.Windows.Media.Imaging;
 using FocusBuddy.Models;
 using FocusBuddy.Services;
 
@@ -31,16 +36,16 @@ public partial class MainWindowViewModel : ObservableObject
     private CategoryRuleEditorViewModel? _selectedCategoryRule;
 
     [ObservableProperty]
-    private string? _selectedRunningProgramForBlacklist;
+    private ProgramDisplayItem? _selectedRunningProgramForBlacklist;
 
     [ObservableProperty]
-    private string? _selectedBlacklistProgram;
+    private ProgramDisplayItem? _selectedBlacklistProgram;
 
     [ObservableProperty]
-    private string? _selectedRunningProgramForRule;
+    private ProgramDisplayItem? _selectedRunningProgramForRule;
 
     [ObservableProperty]
-    private string? _selectedRuleProgram;
+    private ProgramDisplayItem? _selectedRuleProgram;
 
     [ObservableProperty] private string _subtitleText = string.Empty;
     [ObservableProperty] private string _refreshDashboardText = string.Empty;
@@ -75,9 +80,9 @@ public partial class MainWindowViewModel : ObservableObject
 
     public DashboardViewModel Dashboard => _dashboardViewModel;
     public ObservableCollection<CategoryRuleEditorViewModel> CategoryRules { get; } = [];
-    public ObservableCollection<string> RunningPrograms { get; } = [];
-    public ObservableCollection<string> FocusModeBlacklistPrograms { get; } = [];
-    public ObservableCollection<string> SelectedCategoryRulePrograms { get; } = [];
+    public ObservableCollection<ProgramDisplayItem> RunningPrograms { get; } = [];
+    public ObservableCollection<ProgramDisplayItem> FocusModeBlacklistPrograms { get; } = [];
+    public ObservableCollection<ProgramDisplayItem> SelectedCategoryRulePrograms { get; } = [];
 
     public MainWindowViewModel(DashboardViewModel dashboardViewModel, FocusModeService focusModeService, CategoryService categoryService)
     {
@@ -109,9 +114,16 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private void RefreshRunningPrograms()
     {
+        var iconByProcess = new Dictionary<string, BitmapSource?>(StringComparer.OrdinalIgnoreCase);
+
         var processes = Process.GetProcesses()
             .Where(x => !string.IsNullOrWhiteSpace(x.ProcessName))
-            .Select(x => x.ProcessName.ToLowerInvariant() + ".exe")
+            .Select(x =>
+            {
+                var processName = x.ProcessName.ToLowerInvariant() + ".exe";
+                iconByProcess.TryAdd(processName, TryGetProcessIcon(x));
+                return processName;
+            })
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(x => x)
             .ToList();
@@ -119,30 +131,34 @@ public partial class MainWindowViewModel : ObservableObject
         RunningPrograms.Clear();
         foreach (var process in processes)
         {
-            RunningPrograms.Add(process);
+            RunningPrograms.Add(new ProgramDisplayItem
+            {
+                ProcessName = process,
+                Icon = iconByProcess.TryGetValue(process, out var icon) ? icon : null
+            });
         }
     }
 
     [RelayCommand]
     private void AddBlacklistProgram()
     {
-        if (string.IsNullOrWhiteSpace(SelectedRunningProgramForBlacklist))
+        if (SelectedRunningProgramForBlacklist is null)
         {
             return;
         }
 
-        if (string.Equals(SelectedRunningProgramForBlacklist, SelfProcessName, StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(SelectedRunningProgramForBlacklist.ProcessName, SelfProcessName, StringComparison.OrdinalIgnoreCase))
         {
             return;
         }
 
-        AddUnique(FocusModeBlacklistPrograms, SelectedRunningProgramForBlacklist);
+        AddUnique(FocusModeBlacklistPrograms, SelectedRunningProgramForBlacklist.ProcessName);
     }
 
     [RelayCommand]
     private void RemoveBlacklistProgram()
     {
-        if (string.IsNullOrWhiteSpace(SelectedBlacklistProgram))
+        if (SelectedBlacklistProgram is null)
         {
             return;
         }
@@ -153,13 +169,13 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private void AddProgramToSelectedCategoryRule()
     {
-        if (SelectedCategoryRule is null || string.IsNullOrWhiteSpace(SelectedRunningProgramForRule))
+        if (SelectedCategoryRule is null || SelectedRunningProgramForRule is null)
         {
             return;
         }
 
         var programs = SplitCsv(SelectedCategoryRule.ProcessNames);
-        AddUnique(programs, SelectedRunningProgramForRule);
+        AddUnique(programs, SelectedRunningProgramForRule.ProcessName);
         SelectedCategoryRule.ProcessNames = string.Join(", ", programs);
         RefreshSelectedRulePrograms();
     }
@@ -167,13 +183,13 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private void RemoveProgramFromSelectedCategoryRule()
     {
-        if (SelectedCategoryRule is null || string.IsNullOrWhiteSpace(SelectedRuleProgram))
+        if (SelectedCategoryRule is null || SelectedRuleProgram is null)
         {
             return;
         }
 
         var programs = SplitCsv(SelectedCategoryRule.ProcessNames);
-        var removed = programs.RemoveAll(x => string.Equals(x, SelectedRuleProgram, StringComparison.OrdinalIgnoreCase));
+        var removed = programs.RemoveAll(x => string.Equals(x, SelectedRuleProgram.ProcessName, StringComparison.OrdinalIgnoreCase));
         if (removed == 0)
         {
             return;
@@ -190,13 +206,14 @@ public partial class MainWindowViewModel : ObservableObject
         _settings.AutoMinimizeDistractingApps = AutoMinimizeDistractingApps;
 
         var filteredBlacklist = FocusModeBlacklistPrograms
+            .Select(x => x.ProcessName)
             .Where(x => !string.Equals(x, SelfProcessName, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
         FocusModeBlacklistPrograms.Clear();
         foreach (var processName in filteredBlacklist)
         {
-            FocusModeBlacklistPrograms.Add(processName);
+            AddUnique(FocusModeBlacklistPrograms, processName);
         }
 
         _settings.FocusModeBlacklist = filteredBlacklist;
@@ -262,7 +279,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         foreach (var program in SplitCsv(SelectedCategoryRule.ProcessNames))
         {
-            SelectedCategoryRulePrograms.Add(program);
+            AddProgramIfMissing(SelectedCategoryRulePrograms, program);
         }
     }
 
@@ -388,11 +405,58 @@ public partial class MainWindowViewModel : ObservableObject
             .ToList();
     }
 
+    private void AddUnique(ICollection<ProgramDisplayItem> items, string value)
+    {
+        AddProgramIfMissing(items, value);
+    }
+
     private static void AddUnique(ICollection<string> items, string value)
     {
         if (!items.Contains(value, StringComparer.OrdinalIgnoreCase))
         {
             items.Add(value);
+        }
+    }
+
+    private void AddProgramIfMissing(ICollection<ProgramDisplayItem> items, string processName)
+    {
+        if (items.Any(x => string.Equals(x.ProcessName, processName, StringComparison.OrdinalIgnoreCase)))
+        {
+            return;
+        }
+
+        var runningProgram = RunningPrograms.FirstOrDefault(x => string.Equals(x.ProcessName, processName, StringComparison.OrdinalIgnoreCase));
+        items.Add(new ProgramDisplayItem
+        {
+            ProcessName = processName,
+            Icon = runningProgram?.Icon
+        });
+    }
+
+    private static BitmapSource? TryGetProcessIcon(Process process)
+    {
+        try
+        {
+            var filePath = process.MainModule?.FileName;
+            if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+            {
+                return null;
+            }
+
+            using var icon = Icon.ExtractAssociatedIcon(filePath);
+            if (icon is null)
+            {
+                return null;
+            }
+
+            return Imaging.CreateBitmapSourceFromHIcon(
+                icon.Handle,
+                Int32Rect.Empty,
+                BitmapSizeOptions.FromWidthAndHeight(16, 16));
+        }
+        catch
+        {
+            return null;
         }
     }
 }
