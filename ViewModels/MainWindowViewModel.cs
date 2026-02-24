@@ -11,6 +11,7 @@ public partial class MainWindowViewModel : ObservableObject
 {
     private const string English = "en";
     private const string Korean = "ko";
+    private const string SelfProcessName = "focusbuddy.exe";
 
     private readonly DashboardViewModel _dashboardViewModel;
     private readonly FocusModeService _focusModeService;
@@ -46,7 +47,9 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private string _languageText = string.Empty;
     [ObservableProperty] private string _focusModeTitleText = string.Empty;
     [ObservableProperty] private string _enableFocusModeText = string.Empty;
+    [ObservableProperty] private string _enableFocusModeTooltipText = string.Empty;
     [ObservableProperty] private string _autoMinimizeText = string.Empty;
+    [ObservableProperty] private string _autoMinimizeTooltipText = string.Empty;
     [ObservableProperty] private string _blacklistLabelText = string.Empty;
     [ObservableProperty] private string _blacklistAvailableProgramsText = string.Empty;
     [ObservableProperty] private string _blacklistSelectedProgramsText = string.Empty;
@@ -128,6 +131,11 @@ public partial class MainWindowViewModel : ObservableObject
             return;
         }
 
+        if (string.Equals(SelectedRunningProgramForBlacklist, SelfProcessName, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
         AddUnique(FocusModeBlacklistPrograms, SelectedRunningProgramForBlacklist);
     }
 
@@ -180,7 +188,18 @@ public partial class MainWindowViewModel : ObservableObject
     {
         _settings.FocusModeEnabled = IsFocusModeEnabled;
         _settings.AutoMinimizeDistractingApps = AutoMinimizeDistractingApps;
-        _settings.FocusModeBlacklist = FocusModeBlacklistPrograms.ToList();
+
+        var filteredBlacklist = FocusModeBlacklistPrograms
+            .Where(x => !string.Equals(x, SelfProcessName, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        FocusModeBlacklistPrograms.Clear();
+        foreach (var processName in filteredBlacklist)
+        {
+            FocusModeBlacklistPrograms.Add(processName);
+        }
+
+        _settings.FocusModeBlacklist = filteredBlacklist;
 
         await _focusModeService.SaveSettingsAsync(_settings);
     }
@@ -254,6 +273,11 @@ public partial class MainWindowViewModel : ObservableObject
         FocusModeBlacklistPrograms.Clear();
         foreach (var processName in settings.FocusModeBlacklist)
         {
+            if (string.Equals(processName, SelfProcessName, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
             AddUnique(FocusModeBlacklistPrograms, processName);
         }
 
@@ -290,7 +314,9 @@ public partial class MainWindowViewModel : ObservableObject
             LanguageText = "언어";
             FocusModeTitleText = "집중 모드";
             EnableFocusModeText = "집중 모드 사용";
+            EnableFocusModeTooltipText = "집중 모드를 켜면 블랙리스트 앱 실행 시 알림을 보여줍니다.";
             AutoMinimizeText = "방해 앱 자동 최소화";
+            AutoMinimizeTooltipText = "집중 모드가 켜져 있을 때 블랙리스트 앱 창을 자동으로 최소화합니다.";
             BlacklistLabelText = "블랙리스트 프로그램";
             BlacklistAvailableProgramsText = "현재 실행 중 프로그램";
             BlacklistSelectedProgramsText = "선택된 블랙리스트";
@@ -319,7 +345,9 @@ public partial class MainWindowViewModel : ObservableObject
         LanguageText = "Language";
         FocusModeTitleText = "Focus Mode";
         EnableFocusModeText = "Enable Focus Mode";
+        EnableFocusModeTooltipText = "When enabled, FocusBuddy shows reminders if a blacklisted app becomes active.";
         AutoMinimizeText = "Auto-minimize distracting apps";
+        AutoMinimizeTooltipText = "When Focus Mode is on, blacklisted app windows are minimized automatically.";
         BlacklistLabelText = "Blacklist Programs";
         BlacklistAvailableProgramsText = "Currently Running Programs";
         BlacklistSelectedProgramsText = "Selected Blacklist";
