@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
 using FocusBuddy.Models;
 using FocusBuddy.Services;
 
@@ -12,6 +13,7 @@ public partial class MainWindowViewModel : ObservableObject
 
     private readonly DashboardViewModel _dashboardViewModel;
     private readonly FocusModeService _focusModeService;
+    private readonly CategoryService _categoryService;
     private AppSettings _settings = new();
 
     [ObservableProperty]
@@ -39,17 +41,31 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private string _last7DaysText = string.Empty;
     [ObservableProperty] private string _topAppsTodayText = string.Empty;
     [ObservableProperty] private string _categoryRulesText = string.Empty;
+    [ObservableProperty] private string _addCategoryRuleText = string.Empty;
+    [ObservableProperty] private string _removeCategoryRuleText = string.Empty;
+    [ObservableProperty] private string _saveCategoryRulesText = string.Empty;
+    [ObservableProperty] private string _categoryColumnText = string.Empty;
+    [ObservableProperty] private string _processColumnText = string.Empty;
+    [ObservableProperty] private string _keywordsColumnText = string.Empty;
 
     public IReadOnlyList<string> LanguageOptions { get; } = [English, Korean];
 
     public DashboardViewModel Dashboard => _dashboardViewModel;
-    public IReadOnlyList<Models.CategoryRule> CategoryRules { get; }
+    public ObservableCollection<CategoryRuleEditorViewModel> CategoryRules { get; } = [];
+
+    [ObservableProperty]
+    private CategoryRuleEditorViewModel? _selectedCategoryRule;
 
     public MainWindowViewModel(DashboardViewModel dashboardViewModel, FocusModeService focusModeService, CategoryService categoryService)
     {
         _dashboardViewModel = dashboardViewModel;
         _focusModeService = focusModeService;
-        CategoryRules = categoryService.GetRules();
+        _categoryService = categoryService;
+
+        foreach (var rule in _categoryService.GetRules())
+        {
+            CategoryRules.Add(ToEditorRule(rule));
+        }
     }
 
     public async Task InitializeAsync()
@@ -75,6 +91,47 @@ public partial class MainWindowViewModel : ObservableObject
             .ToList();
 
         await _focusModeService.SaveSettingsAsync(_settings);
+    }
+
+    [RelayCommand]
+    private void AddCategoryRule()
+    {
+        var newRule = new CategoryRuleEditorViewModel
+        {
+            Category = "New Category"
+        };
+
+        CategoryRules.Add(newRule);
+        SelectedCategoryRule = newRule;
+    }
+
+    [RelayCommand]
+    private void RemoveCategoryRule()
+    {
+        if (SelectedCategoryRule is null)
+        {
+            return;
+        }
+
+        CategoryRules.Remove(SelectedCategoryRule);
+        SelectedCategoryRule = null;
+    }
+
+    [RelayCommand]
+    private async Task SaveCategoryRulesAsync()
+    {
+        var rules = CategoryRules
+            .Where(x => !string.IsNullOrWhiteSpace(x.Category))
+            .Select(x => new CategoryRule
+            {
+                Category = x.Category.Trim(),
+                ProcessNames = SplitCsv(x.ProcessNames),
+                WindowTitleKeywords = SplitCsv(x.WindowTitleKeywords)
+            })
+            .ToList();
+
+        await _categoryService.SaveRulesAsync(rules);
+        await Dashboard.RefreshAsync();
     }
 
     private void BindSettings(AppSettings settings)
@@ -123,6 +180,12 @@ public partial class MainWindowViewModel : ObservableObject
             Last7DaysText = "최근 7일";
             TopAppsTodayText = "오늘 상위 5개 앱";
             CategoryRulesText = "카테고리 규칙";
+            AddCategoryRuleText = "규칙 추가";
+            RemoveCategoryRuleText = "선택 규칙 삭제";
+            SaveCategoryRulesText = "카테고리 규칙 저장";
+            CategoryColumnText = "카테고리";
+            ProcessColumnText = "프로세스(.exe, 쉼표 구분)";
+            KeywordsColumnText = "제목 키워드(쉼표 구분)";
             return;
         }
 
@@ -139,5 +202,28 @@ public partial class MainWindowViewModel : ObservableObject
         Last7DaysText = "Last 7 Days";
         TopAppsTodayText = "Top 5 Apps Today";
         CategoryRulesText = "Category Rules";
+        AddCategoryRuleText = "Add Rule";
+        RemoveCategoryRuleText = "Remove Selected Rule";
+        SaveCategoryRulesText = "Save Category Rules";
+        CategoryColumnText = "Category";
+        ProcessColumnText = "Processes (.exe, comma-separated)";
+        KeywordsColumnText = "Window Title Keywords (comma-separated)";
+    }
+
+    private static CategoryRuleEditorViewModel ToEditorRule(CategoryRule rule)
+    {
+        return new CategoryRuleEditorViewModel
+        {
+            Category = rule.Category,
+            ProcessNames = string.Join(", ", rule.ProcessNames),
+            WindowTitleKeywords = string.Join(", ", rule.WindowTitleKeywords)
+        };
+    }
+
+    private static List<string> SplitCsv(string value)
+    {
+        return value
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToList();
     }
 }

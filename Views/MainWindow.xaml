@@ -72,13 +72,31 @@
                 <Border Background="#2A2A2A" CornerRadius="8" Padding="12" Margin="0,14,0,0">
                     <StackPanel>
                         <TextBlock Text="{Binding CategoryRulesText}" FontSize="18" Margin="0,0,0,8"/>
-                        <ItemsControl ItemsSource="{Binding CategoryRules}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Category}" Margin="0,2"/>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <DataGrid ItemsSource="{Binding CategoryRules}"
+                                  SelectedItem="{Binding SelectedCategoryRule}"
+                                  AutoGenerateColumns="False"
+                                  CanUserAddRows="False"
+                                  HeadersVisibility="Column"
+                                  MinHeight="180"
+                                  Margin="0,0,0,8">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="{Binding DataContext.CategoryColumnText, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    Binding="{Binding Category, UpdateSourceTrigger=PropertyChanged}"
+                                                    Width="180"/>
+                                <DataGridTextColumn Header="{Binding DataContext.ProcessColumnText, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    Binding="{Binding ProcessNames, UpdateSourceTrigger=PropertyChanged}"
+                                                    Width="*"/>
+                                <DataGridTextColumn Header="{Binding DataContext.KeywordsColumnText, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                    Binding="{Binding WindowTitleKeywords, UpdateSourceTrigger=PropertyChanged}"
+                                                    Width="*"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="{Binding AddCategoryRuleText}" Command="{Binding AddCategoryRuleCommand}" Margin="0,0,8,0"/>
+                            <Button Content="{Binding RemoveCategoryRuleText}" Command="{Binding RemoveCategoryRuleCommand}" Margin="0,0,8,0"/>
+                            <Button Content="{Binding SaveCategoryRulesText}" Command="{Binding SaveCategoryRulesCommand}"/>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
             </StackPanel>
