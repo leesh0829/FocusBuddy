@@ -24,8 +24,16 @@
                 <ComboBox ItemsSource="{Binding LanguageOptions}" SelectedItem="{Binding SelectedLanguage}" Margin="0,0,0,10" />
 
                 <TextBlock Text="{Binding FocusModeTitleText}" FontSize="18" Margin="0,0,0,8" />
-                <CheckBox IsChecked="{Binding IsFocusModeEnabled}" Content="{Binding EnableFocusModeText}" Margin="0,4" Foreground="White"/>
-                <CheckBox IsChecked="{Binding AutoMinimizeDistractingApps}" Content="{Binding AutoMinimizeText}" Margin="0,4" Foreground="White"/>
+                <CheckBox IsChecked="{Binding IsFocusModeEnabled}"
+                          Content="{Binding EnableFocusModeText}"
+                          ToolTip="{Binding EnableFocusModeTooltipText}"
+                          Margin="0,4"
+                          Foreground="White"/>
+                <CheckBox IsChecked="{Binding AutoMinimizeDistractingApps}"
+                          Content="{Binding AutoMinimizeText}"
+                          ToolTip="{Binding AutoMinimizeTooltipText}"
+                          Margin="0,4"
+                          Foreground="White"/>
 
                 <TextBlock Text="{Binding BlacklistLabelText}" Margin="0,12,0,6"/>
                 <Button Content="{Binding RefreshProgramListText}" Command="{Binding RefreshRunningProgramsCommand}" Margin="0,0,0,8"/>
