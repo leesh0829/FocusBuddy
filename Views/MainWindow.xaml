@@ -72,6 +72,10 @@
                 <Border Background="#2A2A2A" CornerRadius="8" Padding="12" Margin="0,14,0,0">
                     <StackPanel>
                         <TextBlock Text="{Binding CategoryRulesText}" FontSize="18" Margin="0,0,0,8"/>
+                        <TextBlock Text="{Binding CategoryRulesHeaderText}"
+                                   Foreground="#BFBFBF"
+                                   TextWrapping="Wrap"
+                                   Margin="0,0,0,8"/>
                         <DataGrid ItemsSource="{Binding CategoryRules}"
                                   SelectedItem="{Binding SelectedCategoryRule}"
                                   AutoGenerateColumns="False"
