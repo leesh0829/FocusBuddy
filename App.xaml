@@ -16,6 +16,11 @@
         <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="#343434"/>
         <SolidColorBrush x:Key="{x:Static SystemColors.ControlLightBrushKey}" Color="#3E3E3E"/>
         <SolidColorBrush x:Key="{x:Static SystemColors.ControlTextBrushKey}" Color="#F5F5F5"/>
+        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#F5F5F5"/>
+        <SolidColorBrush x:Key="{x:Static SystemColors.GrayTextBrushKey}" Color="#BFBFBF"/>
+        <Color x:Key="{x:Static SystemColors.WindowColorKey}">#343434</Color>
+        <Color x:Key="{x:Static SystemColors.ControlColorKey}">#343434</Color>
+        <Color x:Key="{x:Static SystemColors.HighlightColorKey}">#2E7D32</Color>
         <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#2E7D32"/>
         <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#FFFFFF"/>
 
@@ -43,6 +48,30 @@
             <Setter Property="BorderBrush" Value="{StaticResource ControlBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="6,4"/>
+        </Style>
+
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Background" Value="{StaticResource ControlBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
+            <Setter Property="Padding" Value="6,3"/>
+            <Style.Triggers>
+                <Trigger Property="IsHighlighted" Value="True">
+                    <Setter Property="Background" Value="{StaticResource ControlHoverBrush}"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{StaticResource SelectedBrush}"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="{StaticResource ControlBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource ControlBorderBrush}"/>
+            <Setter Property="CaretBrush" Value="{StaticResource ForegroundBrush}"/>
+            <Setter Property="SelectionBrush" Value="{StaticResource SelectedBrush}"/>
+            <Setter Property="SelectionTextBrush" Value="White"/>
         </Style>
 
         <Style TargetType="ListBox">
