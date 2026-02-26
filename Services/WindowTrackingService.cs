@@ -8,7 +8,10 @@ namespace FocusBuddy.Services;
 
 public sealed class WindowTrackingService
 {
-    private const string LockScreenProcessName = "lockapp.exe";
+    private static readonly HashSet<string> IgnoredForegroundProcesses = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "lockapp.exe"
+    };
 
     private readonly CategoryService _categoryService;
     private readonly DatabaseService _databaseService;
@@ -108,7 +111,7 @@ public sealed class WindowTrackingService
         await CloseCurrentSessionAsync(nowUtc);
 
         var processName = ResolveProcessName(hwnd);
-        if (string.Equals(processName, LockScreenProcessName, StringComparison.OrdinalIgnoreCase))
+        if (IgnoredForegroundProcesses.Contains(processName))
         {
             return;
         }
