@@ -8,6 +8,8 @@ namespace FocusBuddy.Data;
 
 public sealed class DatabaseService
 {
+    private const string LockScreenProcessName = "lockapp.exe";
+
     private readonly string _connectionString;
 
     public DatabaseService()
@@ -74,7 +76,9 @@ VALUES($process, $title, $category, $start, $end, $duration);";
         command.CommandText = @"
 SELECT COALESCE(SUM(duration_seconds), 0)
 FROM usage_sessions
-WHERE DATE(start_time) = DATE('now', 'localtime');";
+WHERE DATE(start_time) = DATE('now', 'localtime')
+  AND process_name != $lockAppProcessName COLLATE NOCASE;";
+        command.Parameters.AddWithValue("$lockAppProcessName", LockScreenProcessName);
 
         var result = await command.ExecuteScalarAsync();
         return Convert.ToInt32(result);
@@ -90,8 +94,10 @@ WHERE DATE(start_time) = DATE('now', 'localtime');";
 SELECT DATE(start_time) as usage_date, category, COALESCE(SUM(duration_seconds),0)
 FROM usage_sessions
 WHERE DATE(start_time) >= DATE('now', 'localtime', '-6 day')
+  AND process_name != $lockAppProcessName COLLATE NOCASE
 GROUP BY usage_date, category
 ORDER BY usage_date ASC;";
+        command.Parameters.AddWithValue("$lockAppProcessName", LockScreenProcessName);
 
         var output = new List<DailyUsageSummary>();
         await using var reader = await command.ExecuteReaderAsync();
@@ -118,8 +124,10 @@ ORDER BY usage_date ASC;";
 SELECT category, COALESCE(SUM(duration_seconds),0)
 FROM usage_sessions
 WHERE DATE(start_time) = DATE('now', 'localtime')
+  AND process_name != $lockAppProcessName COLLATE NOCASE
 GROUP BY category
 ORDER BY 2 DESC;";
+        command.Parameters.AddWithValue("$lockAppProcessName", LockScreenProcessName);
 
         var output = new List<DailyUsageSummary>();
         await using var reader = await command.ExecuteReaderAsync();
@@ -146,9 +154,11 @@ ORDER BY 2 DESC;";
 SELECT process_name, COALESCE(SUM(duration_seconds),0) as total
 FROM usage_sessions
 WHERE DATE(start_time) = DATE('now', 'localtime')
+  AND process_name != $lockAppProcessName COLLATE NOCASE
 GROUP BY process_name
 ORDER BY total DESC
 LIMIT $take;";
+        command.Parameters.AddWithValue("$lockAppProcessName", LockScreenProcessName);
         command.Parameters.AddWithValue("$take", take);
 
         var output = new List<AppUsageSummary>();
