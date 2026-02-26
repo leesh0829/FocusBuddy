@@ -8,6 +8,8 @@ namespace FocusBuddy.Services;
 
 public sealed class WindowTrackingService
 {
+    private const string LockScreenProcessName = "lockapp.exe";
+
     private readonly CategoryService _categoryService;
     private readonly DatabaseService _databaseService;
     private readonly FocusModeService _focusModeService;
@@ -105,9 +107,15 @@ public sealed class WindowTrackingService
         var nowUtc = DateTime.UtcNow;
         await CloseCurrentSessionAsync(nowUtc);
 
+        var processName = ResolveProcessName(hwnd);
+        if (string.Equals(processName, LockScreenProcessName, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
         _currentWindowHandle = hwnd;
         _currentTitle = Win32Interop.ReadWindowTitle(hwnd);
-        _currentProcess = ResolveProcessName(hwnd);
+        _currentProcess = processName;
         _currentCategory = _categoryService.ResolveCategory(_currentProcess, _currentTitle);
         _sessionStartUtc = nowUtc;
 
