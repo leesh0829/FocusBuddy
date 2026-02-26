@@ -7,6 +7,9 @@
         Title="FocusBuddy"
         Height="760"
         Width="1200">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="280" />
@@ -81,7 +84,14 @@
             <StackPanel Margin="20">
                 <Border Background="#2A2A2A" CornerRadius="8" Padding="16" Margin="0,0,0,14">
                     <StackPanel>
-                        <TextBlock Text="{Binding TodayTotalText}" FontSize="16" Foreground="#AFAFAF"/>
+                        <DockPanel LastChildFill="False" Margin="0,0,0,6">
+                            <TextBlock Text="{Binding TodayTotalText}" FontSize="16" Foreground="#AFAFAF" DockPanel.Dock="Left"/>
+                            <Button Content="{Binding ReturnToTodayText}"
+                                    Command="{Binding Dashboard.ReturnToTodayCommand}"
+                                    Visibility="{Binding Dashboard.IsViewingHistoricalDate, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    HorizontalAlignment="Right"
+                                    DockPanel.Dock="Right"/>
+                        </DockPanel>
                         <TextBlock Text="{Binding Dashboard.TodayTotalTime}" FontSize="30" FontWeight="Bold"/>
                     </StackPanel>
                 </Border>
@@ -102,7 +112,17 @@
                     <Border Grid.Column="1" Background="#2A2A2A" CornerRadius="8" Padding="12" Margin="8,0,0,0">
                         <StackPanel>
                             <TextBlock Text="{Binding Last7DaysText}" FontSize="18" Margin="0,0,0,12"/>
-                            <ItemsControl ItemsSource="{Binding Dashboard.WeeklyTotals}" />
+                            <ItemsControl ItemsSource="{Binding Dashboard.WeeklyTotals}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Content="{Binding DisplayText}"
+                                                HorizontalContentAlignment="Left"
+                                                Margin="0,0,0,6"
+                                                Command="{Binding DataContext.Dashboard.SelectWeeklyDateCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </StackPanel>
                     </Border>
                 </Grid>
