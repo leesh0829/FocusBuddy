@@ -8,6 +8,8 @@ namespace FocusBuddy.Data;
 
 public sealed class DatabaseService
 {
+    private const string LockScreenProcessName = "lockapp.exe";
+
     private readonly string _connectionString;
 
     public DatabaseService()
@@ -67,6 +69,11 @@ VALUES($process, $title, $category, $start, $end, $duration);";
 
     public async Task<int> GetTodayTotalSecondsAsync()
     {
+        return await GetTotalSecondsByDateAsync(DateOnly.FromDateTime(DateTime.Now));
+    }
+
+    public async Task<int> GetTotalSecondsByDateAsync(DateOnly date)
+    {
         await using var connection = new SqliteConnection(_connectionString);
         await connection.OpenAsync();
 
@@ -74,7 +81,10 @@ VALUES($process, $title, $category, $start, $end, $duration);";
         command.CommandText = @"
 SELECT COALESCE(SUM(duration_seconds), 0)
 FROM usage_sessions
-WHERE DATE(start_time) = DATE('now', 'localtime');";
+WHERE DATE(start_time) = $targetDate
+  AND process_name != $lockAppProcessName COLLATE NOCASE;";
+        command.Parameters.AddWithValue("$targetDate", date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+        command.Parameters.AddWithValue("$lockAppProcessName", LockScreenProcessName);
 
         var result = await command.ExecuteScalarAsync();
         return Convert.ToInt32(result);
@@ -90,8 +100,10 @@ WHERE DATE(start_time) = DATE('now', 'localtime');";
 SELECT DATE(start_time) as usage_date, category, COALESCE(SUM(duration_seconds),0)
 FROM usage_sessions
 WHERE DATE(start_time) >= DATE('now', 'localtime', '-6 day')
+  AND process_name != $lockAppProcessName COLLATE NOCASE
 GROUP BY usage_date, category
 ORDER BY usage_date ASC;";
+        command.Parameters.AddWithValue("$lockAppProcessName", LockScreenProcessName);
 
         var output = new List<DailyUsageSummary>();
         await using var reader = await command.ExecuteReaderAsync();
@@ -110,6 +122,11 @@ ORDER BY usage_date ASC;";
 
     public async Task<List<DailyUsageSummary>> GetTodayByCategoryAsync()
     {
+        return await GetByCategoryAsync(DateOnly.FromDateTime(DateTime.Now));
+    }
+
+    public async Task<List<DailyUsageSummary>> GetByCategoryAsync(DateOnly date)
+    {
         await using var connection = new SqliteConnection(_connectionString);
         await connection.OpenAsync();
 
@@ -117,9 +134,12 @@ ORDER BY usage_date ASC;";
         command.CommandText = @"
 SELECT category, COALESCE(SUM(duration_seconds),0)
 FROM usage_sessions
-WHERE DATE(start_time) = DATE('now', 'localtime')
+WHERE DATE(start_time) = $targetDate
+  AND process_name != $lockAppProcessName COLLATE NOCASE
 GROUP BY category
 ORDER BY 2 DESC;";
+        command.Parameters.AddWithValue("$targetDate", date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+        command.Parameters.AddWithValue("$lockAppProcessName", LockScreenProcessName);
 
         var output = new List<DailyUsageSummary>();
         await using var reader = await command.ExecuteReaderAsync();
@@ -127,7 +147,7 @@ ORDER BY 2 DESC;";
         {
             output.Add(new DailyUsageSummary
             {
-                Date = DateOnly.FromDateTime(DateTime.Now),
+                Date = date,
                 Category = reader.GetString(0),
                 DurationSeconds = reader.GetInt32(1)
             });
@@ -138,6 +158,11 @@ ORDER BY 2 DESC;";
 
     public async Task<List<AppUsageSummary>> GetTopAppsTodayAsync(int take = 5)
     {
+        return await GetTopAppsByDateAsync(DateOnly.FromDateTime(DateTime.Now), take);
+    }
+
+    public async Task<List<AppUsageSummary>> GetTopAppsByDateAsync(DateOnly date, int take = 5)
+    {
         await using var connection = new SqliteConnection(_connectionString);
         await connection.OpenAsync();
 
@@ -145,10 +170,13 @@ ORDER BY 2 DESC;";
         command.CommandText = @"
 SELECT process_name, COALESCE(SUM(duration_seconds),0) as total
 FROM usage_sessions
-WHERE DATE(start_time) = DATE('now', 'localtime')
+WHERE DATE(start_time) = $targetDate
+  AND process_name != $lockAppProcessName COLLATE NOCASE
 GROUP BY process_name
 ORDER BY total DESC
 LIMIT $take;";
+        command.Parameters.AddWithValue("$targetDate", date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+        command.Parameters.AddWithValue("$lockAppProcessName", LockScreenProcessName);
         command.Parameters.AddWithValue("$take", take);
 
         var output = new List<AppUsageSummary>();

@@ -67,6 +67,7 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private string _todayByCategoryText = string.Empty;
     [ObservableProperty] private string _last7DaysText = string.Empty;
     [ObservableProperty] private string _topAppsTodayText = string.Empty;
+    [ObservableProperty] private string _returnToTodayText = string.Empty;
     [ObservableProperty] private string _categoryRulesText = string.Empty;
     [ObservableProperty] private string _categoryRulesHeaderText = string.Empty;
     [ObservableProperty] private string _addCategoryRuleText = string.Empty;
@@ -342,10 +343,11 @@ public partial class MainWindowViewModel : ObservableObject
             AddProgramText = "추가";
             RemoveProgramText = "제거";
             SaveFocusSettingsText = "집중 설정 저장";
-            TodayTotalText = "오늘 총 사용 시간";
-            TodayByCategoryText = "오늘 카테고리별";
+            TodayTotalText = "총 사용 시간";
+            TodayByCategoryText = "카테고리별";
             Last7DaysText = "최근 7일";
-            TopAppsTodayText = "오늘 상위 5개 앱";
+            TopAppsTodayText = "상위 5개 앱";
+            ReturnToTodayText = "오늘로 돌아가기";
             CategoryRulesText = "카테고리 규칙";
             CategoryRulesHeaderText = "앱/창 이름을 카테고리에 매핑해 대시보드 분류 기준을 설정하는 표입니다.";
             AddCategoryRuleText = "규칙 추가";
@@ -373,10 +375,11 @@ public partial class MainWindowViewModel : ObservableObject
         AddProgramText = "Add";
         RemoveProgramText = "Remove";
         SaveFocusSettingsText = "Save Focus Settings";
-        TodayTotalText = "Today Total";
-        TodayByCategoryText = "Today by Category";
+        TodayTotalText = "Total Usage Time";
+        TodayByCategoryText = "By Category";
         Last7DaysText = "Last 7 Days";
-        TopAppsTodayText = "Top 5 Apps Today";
+        TopAppsTodayText = "Top 5 Apps";
+        ReturnToTodayText = "Back to Today";
         CategoryRulesText = "Category Rules";
         CategoryRulesHeaderText = "Use this table to map apps/window titles to categories used in dashboard summaries.";
         AddCategoryRuleText = "Add Rule";
