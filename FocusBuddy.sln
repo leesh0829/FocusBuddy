@@ -5,7 +5,7 @@ VisualStudioVersion = 17.14.36310.24
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FocusBuddy", "FocusBuddy.csproj", "{496AE94D-BD64-1426-895B-7B97AC664562}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "FocusBuddy Setup1", "..\FocusBuddy Setup1\FocusBuddy Setup1.vdproj", "{2ABEFD74-E5E4-B40A-DD58-F6D6B057A40A}"
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "FocusBuddy Setup", "..\FocusBuddy Setup\FocusBuddy Setup.vdproj", "{2ABEFD74-E5E4-B40A-DD58-F6D6B057A40A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
